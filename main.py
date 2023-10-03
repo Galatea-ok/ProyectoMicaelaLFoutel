@@ -42,7 +42,7 @@ def UserForGenre(genre: str) -> dict:
 @app.get('/UsersRecommend/')
 def UsersRecommend(year: int) -> dict:
     df_filtrado = df[(df['year'] == year) & (
-        df['recommend'] == True) & (df['sentiment_score'] == 2)]
+        df['recommend'] == True) & (df['sentiment_score'] == 0)]
     if df_filtrado.empty:
         return {"error": 'Valor no encontrado'}
     df_ordenado = df_filtrado.sort_values(
@@ -59,7 +59,7 @@ def UsersRecommend(year: int) -> dict:
 @app.get('/UsersNotRecommed/')
 def UsersRecommend(year: int) -> dict:
     df_filtrado = df[(df['year'] == year) & (
-        df['recommend'] == False) & (df['sentiment_score'] <= 1)]
+        df['recommend'] == False) & (df['sentiment_score'] <= 2)]
     if df_filtrado.empty:
         return {"error": 'Valor no encontrado'}
     df_ordenado = df_filtrado.sort_values(
