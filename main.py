@@ -1,7 +1,7 @@
 import pandas as pd
 from fastapi import FastAPI
-from sklearn.metrics.pairwise        import cosine_similarity
-from sklearn.metrics.pairwise        import linear_kernel
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import linear_kernel
 from sklearn.feature_extraction.text import TfidfVectorizer
 app = FastAPI()
 
@@ -17,16 +17,21 @@ def index():
 def PlayTimeGenre(genre: str) -> dict:
     genre = genre.capitalize()
     genre_df = df[df[genre] == 1]
-    year_playtime_df = genre_df.groupby('year')['playtime_forever'].sum().reset_index()
-    max_playtime_year = year_playtime_df.loc[year_playtime_df['playtime_forever'].idxmax(), 'year']
+    year_playtime_df = genre_df.groupby(
+        'year')['playtime_forever'].sum().reset_index()
+    max_playtime_year = year_playtime_df.loc[year_playtime_df['playtime_forever'].idxmax(
+    ), 'year']
     return {"Género": genre, "Año de lanzamiento con más horas jugadas para Género :": int(max_playtime_year)}
+
 
 @app.get('/UserForGenre/')
 def UserForGenre(genre: str) -> dict:
     genre = genre.capitalize()
     genre_df = df[df[genre] == 1]
-    max_playtime_user = genre_df.loc[genre_df['playtime_forever'].idxmax(), 'user_id']
-    year_playtime_df = genre_df.groupby('year')['playtime_forever'].sum().reset_index()
+    max_playtime_user = genre_df.loc[genre_df['playtime_forever'].idxmax(
+    ), 'user_id']
+    year_playtime_df = genre_df.groupby(
+        'year')['playtime_forever'].sum().reset_index()
     playtime_list = year_playtime_df.to_dict(orient='records')
     result = {
         "Usuario con más horas jugadas para Género " + genre: max_playtime_user,
@@ -36,10 +41,12 @@ def UserForGenre(genre: str) -> dict:
 
 @app.get('/UsersRecommend/')
 def UsersRecommend(year: int) -> dict:
-    df_filtrado = df[(df['year'] == year) & (df['recommend'] == True) & (df['sentiment_score'] == 2)]
+    df_filtrado = df[(df['year'] == year) & (
+        df['recommend'] == True) & (df['sentiment_score'] == 2)]
     if df_filtrado.empty:
         return {"error": 'Valor no encontrado'}
-    df_ordenado = df_filtrado.sort_values(by='sentiment_score', ascending=False)
+    df_ordenado = df_filtrado.sort_values(
+        by='sentiment_score', ascending=False)
     top_3_reseñas = df_ordenado.head(3)
     resultado = {
         "Puesto 1": top_3_reseñas.iloc[0]['title'],
@@ -48,12 +55,15 @@ def UsersRecommend(year: int) -> dict:
     }
     return resultado
 
+
 @app.get('/UsersNotRecommed/')
 def UsersRecommend(year: int) -> dict:
-    df_filtrado = df[(df['year'] == year) & (df['recommend'] == False) & (df['sentiment_score'] <= 1)]
+    df_filtrado = df[(df['year'] == year) & (
+        df['recommend'] == False) & (df['sentiment_score'] <= 1)]
     if df_filtrado.empty:
         return {"error": 'Valor no encontrado'}
-    df_ordenado = df_filtrado.sort_values(by='sentiment_score', ascending=False)
+    df_ordenado = df_filtrado.sort_values(
+        by='sentiment_score', ascending=False)
     top_3_reseñas = df_ordenado.head(3)
     resultado = {
         "Puesto 1": top_3_reseñas.iloc[0]['title'],
@@ -61,6 +71,7 @@ def UsersRecommend(year: int) -> dict:
         "Puesto 3": top_3_reseñas.iloc[2]['title']
     }
     return resultado
+
 
 @app.get('/sentiment_analysis/')
 def sentiment_analysis(year: int) -> dict:
@@ -76,11 +87,13 @@ def sentiment_analysis(year: int) -> dict:
 
 muestra = df.head(4000)
 tfidf = TfidfVectorizer(stop_words='english')
-muestra=muestra.fillna("")
+muestra = muestra.fillna("")
 
 tdfid_matrix = tfidf.fit_transform(muestra['review'])
-cosine_similarity = linear_kernel( tdfid_matrix, tdfid_matrix)
+cosine_similarity = linear_kernel(tdfid_matrix, tdfid_matrix)
 
+
+@app.get('/recomendacion_juego/{id_juego}')
 def recomendacion_juego(id_juego: int):
     if id_juego not in muestra['id'].values:
         return {'mensaje': 'No existe el id del juego.'}
